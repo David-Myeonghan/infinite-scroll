@@ -1,41 +1,49 @@
-import { useEffect, useState } from 'react';
+import { Link, Route, Routes } from 'react-router-dom';
 import './App.css';
-import { getProducts, type Product } from './api';
+import ObserverRebuild from './pages/ObserverRebuild';
+import StableObserver from './pages/StableObserver';
+
+function Home() {
+	return (
+		<>
+			<h1>Infinite Scroll Playground</h1>
+			<p>같은 무한스크롤을 두 가지 방식으로 구현 — 비교용.</p>
+			<ul>
+				<li>
+					<Link to="/stable">Stable Observer</Link> — observer 1번 등록, fetch
+					분리
+				</li>
+				<li>
+					<Link to="/rebuild">Observer Rebuild</Link> — useCallback chain,
+					observer 매 페이지 재생성
+				</li>
+			</ul>
+		</>
+	);
+}
+
+function Layout({ children }: { children: React.ReactNode }) {
+	return (
+		<>
+			<nav style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
+				<Link to="/">Home</Link> {' | '}
+				<Link to="/stable">Stable</Link> {' | '}
+				<Link to="/rebuild">Rebuild</Link>
+			</nav>
+			<main style={{ padding: 16 }}>{children}</main>
+		</>
+	);
+}
 
 function App() {
-	const [isLoading, setIsLoading] = useState<boolean>(true);
-	const [pageOffset, setPageOffset] = useState(0);
-	const [data, setData] = useState<Array<Product>>([]);
-
-	useEffect(() => {
-		let cancelled = false;
-
-		const getData = async () => {
-			const { products } = await getProducts({ skip: pageOffset * 10 });
-			if (cancelled) return;
-			setData((prev) => [...prev, ...products]);
-			setPageOffset((prev) => prev + 1);
-			setIsLoading(false);
-		};
-		getData();
-
-		return () => {
-			cancelled = true;
-		};
-	}, []);
-
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
-
 	return (
-		<ul>
-			{data.map((product) => (
-				<li key={product.id}>
-					{product.title} / {product.price}
-				</li>
-			))}
-		</ul>
+		<Layout>
+			<Routes>
+				<Route path="/" element={<Home />} />
+				<Route path="/stable" element={<StableObserver />} />
+				<Route path="/rebuild" element={<ObserverRebuild />} />
+			</Routes>
+		</Layout>
 	);
 }
 
