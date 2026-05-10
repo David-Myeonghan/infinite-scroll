@@ -17,7 +17,6 @@ function App() {
 			setPageOffset((prev) => prev + 1);
 			setIsLoading(false);
 		};
-
 		getData();
 
 		return () => {
